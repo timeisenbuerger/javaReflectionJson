@@ -45,7 +45,7 @@ public class ObjTreeComparator
 
                   lastElementIndex++;
 
-                  if( !secondItem.startsWith("[") && !secondItem.startsWith("{") )
+                  if( secondItem.length() > 1 && !secondItem.startsWith("[") && !secondItem.startsWith("{") )
                   {
                      nextElement = (String) elements.get(lastElementIndex);
                      if( secondItem.endsWith(",") )
