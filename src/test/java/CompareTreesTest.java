@@ -1,39 +1,38 @@
-import java.io.File;
+import java.io.IOException;
 
-import com.google.gson.JsonObject;
 import features.GsonParser;
 import features.ObjTreeComparator;
-import features.ReflectionObjCollector;
+import model.Company;
+import model.Position;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertTrue;
+import static junit.framework.TestCase.assertTrue;
 
 public class CompareTreesTest
 {
    private static final String FILE_PATH_COMPANY = "inputs\\sampleCompany.json";
-   private static final String FILE_PATH_POSITION = "inputs\\pos.json";
+   private static final String FILE_PATH_POSITION = "inputs\\position.json";
 
-   private JsonObject object;
+   private Company company;
+   private Position position;
 
    @Before
    public void setUp() throws Exception
    {
-      object = GsonParser.parseFromFile(FILE_PATH_COMPANY);
-      object = GsonParser.parseFromFile(FILE_PATH_POSITION);
+      company = GsonParser.parseToCompany(FILE_PATH_COMPANY);
+      position = GsonParser.parseToPosition(FILE_PATH_POSITION);
    }
 
    @Test
-   public void testCompareTreesCompany()
+   public void testCompareTreesCompany() throws IOException, IllegalAccessException
    {
-      ReflectionObjCollector reflectionObjCollector = new ReflectionObjCollector(object);
-      assertTrue(ObjTreeComparator.isEqual(reflectionObjCollector.getElements(), new File(FILE_PATH_COMPANY)));
+      assertTrue(ObjTreeComparator.validate(company, FILE_PATH_COMPANY));
    }
 
    @Test
-   public void testCompareTreesPosition()
+   public void testCompareTreesPosition() throws IOException, IllegalAccessException
    {
-      ReflectionObjCollector reflectionObjCollector = new ReflectionObjCollector(object);
-      assertTrue(ObjTreeComparator.isEqual(reflectionObjCollector.getElements(), new File(FILE_PATH_POSITION)));
+      assertTrue(ObjTreeComparator.validate(position, FILE_PATH_POSITION));
    }
 }
