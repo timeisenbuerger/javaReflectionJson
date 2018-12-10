@@ -1,23 +1,22 @@
 package model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 
 public class Position
 {
-   List<Marker> markers;
+   HashSet<Marker> markers;
 
    public Position()
    {
-      markers = new ArrayList<>();
+      markers = new HashSet<>();
    }
 
-   public Position(List<Marker> markers)
+   public Position(HashSet<Marker> markers)
    {
       this.markers = markers;
    }
 
-   public List<Marker> getMarkers()
+   public HashSet<Marker> getMarkers()
    {
       return markers;
    }

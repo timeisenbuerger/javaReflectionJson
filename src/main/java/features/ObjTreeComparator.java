@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -66,46 +67,11 @@ public class ObjTreeComparator
                }
                else if( jsonElement instanceof JsonArray )
                {
-                  if( fieldValue instanceof Collection )
-                  {
-                     if( ((JsonArray) jsonElement).size() == ((Collection) fieldValue).size() )
-                     {
-                        //go a level deeper for every collection entry
-                        Object[] objects = ((Collection) fieldValue).toArray();
-                        for( int i = 0; i < ((JsonArray) jsonElement).size(); i++ )
-                        {
-                           if( ((JsonArray) jsonElement).get(i) instanceof JsonObject )
-                           {
-                              JsonObject jsonObj = ((JsonArray) jsonElement).get(i).getAsJsonObject();
-                              Object obj = objects[i];
-
-                              isEqual = compareObjects(obj, jsonObj);
-                           }
-                           else if( ((JsonArray) jsonElement).get(i) instanceof JsonPrimitive )
-                           {
-                              String elemString = ((JsonArray) jsonElement).get(i).getAsString().replace("\"", "").trim();
-                              Object obj = objects[i];
-
-                              if( !elemString.equals(obj.toString()) )
-                              {
-                                 isEqual = false;
-                              }
-                           }
-                        }
-                     }
-                     else
-                     {
-                        isEqual = false;
-                     }
-                  }
+                  isEqual = compareCollections(isEqual, fieldValue, (JsonArray) jsonElement);
                }
                else if( jsonElement instanceof JsonPrimitive )
                {
-                  String elemString = jsonElement.getAsString().replace("\"", "").trim();
-                  if( !elemString.equals(fieldValue.toString()) )
-                  {
-                     isEqual = false;
-                  }
+                  comparePrimitives(isEqual, jsonElement, fieldValue);
                }
 
                if( fieldAvailable || !isEqual )
@@ -124,6 +90,114 @@ public class ObjTreeComparator
          }
       }
 
+      return isEqual;
+   }
+
+   /**
+    * Method which handles the comparison between collections
+    *
+    * @param isEqual
+    * @param fieldValue
+    * @param jsonElement
+    * @return true if the values are all the same
+    * @throws IllegalAccessException
+    */
+
+   private static boolean compareCollections(boolean isEqual, Object fieldValue, JsonArray jsonElement) throws IllegalAccessException
+   {
+      if( fieldValue instanceof Collection )
+      {
+         if( jsonElement.size() == ((Collection) fieldValue).size() )
+         {
+            //distinguish sets and other collections
+            if( fieldValue instanceof Set )
+            {
+               Set set = (Set) fieldValue;
+               for( int i = 0; i < jsonElement.size(); i++ )
+               {
+                  JsonElement element = jsonElement.get(i);
+                  boolean isSomeEqual = false;
+                  if( element instanceof JsonObject )
+                  {
+                     for( Object obj : set )
+                     {
+                        isSomeEqual = compareObjects(obj, (JsonObject) element);
+                        if( isSomeEqual )
+                        {
+                           break;
+                        }
+                     }
+                     if( !isSomeEqual )
+                     {
+                        //no equal element in set found, something is not correct
+                        isEqual = false;
+                     }
+                  }
+                  else if( element instanceof JsonPrimitive )
+                  {
+                     for( Object obj : set )
+                     {
+                        isSomeEqual = comparePrimitives(isEqual, element, obj);
+                        if( isSomeEqual )
+                        {
+                           break;
+                        }
+                     }
+                     if( !isSomeEqual )
+                     {
+                        //no equal element in set found, something is not correct
+                        isEqual = false;
+                     }
+                  }
+               }
+            }
+            else
+            {
+               //go a level deeper for every collection entry
+               Object[] objects = ((Collection) fieldValue).toArray();
+               for( int i = 0; i < jsonElement.size(); i++ )
+               {
+                  if( jsonElement.get(i) instanceof JsonObject )
+                  {
+                     JsonObject jsonObj = jsonElement.get(i).getAsJsonObject();
+                     Object obj = objects[i];
+
+                     isEqual = compareObjects(obj, jsonObj);
+                  }
+                  else if( jsonElement.get(i) instanceof JsonPrimitive )
+                  {
+                     isEqual = comparePrimitives(isEqual, jsonElement.get(i), objects[i]);
+                  }
+               }
+            }
+         }
+         else
+         {
+            isEqual = false;
+         }
+      }
+      return isEqual;
+   }
+
+   /**
+    *
+    * Method which handles the comparison between primitives
+    *
+    * @param isEqual
+    * @param jsonElement
+    * @param object
+    * @return
+    */
+
+   private static boolean comparePrimitives(boolean isEqual, JsonElement jsonElement, Object object)
+   {
+      String elemString = jsonElement.getAsString().replace("\"", "").trim();
+      Object obj = object;
+
+      if( !elemString.equals(obj.toString()) )
+      {
+         isEqual = false;
+      }
       return isEqual;
    }
 }
