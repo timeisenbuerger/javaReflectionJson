@@ -57,22 +57,7 @@ public class ObjTreeComparator
                fieldAvailable = true;
                field.setAccessible(true);
 
-               Object fieldValue = field.get(objToReflect);
-               JsonElement jsonElement = entry.getValue();
-
-               if( jsonElement instanceof JsonObject )
-               {
-                  //go a level deeper
-                  isEqual = compareObjects(fieldValue, jsonElement.getAsJsonObject());
-               }
-               else if( jsonElement instanceof JsonArray )
-               {
-                  isEqual = compareCollections(isEqual, fieldValue, (JsonArray) jsonElement);
-               }
-               else if( jsonElement instanceof JsonPrimitive )
-               {
-                  comparePrimitives(isEqual, jsonElement, fieldValue);
-               }
+               isEqual = processForMultipleTypes(objToReflect, isEqual, entry, field);
 
                if( fieldAvailable || !isEqual )
                {
@@ -90,6 +75,40 @@ public class ObjTreeComparator
          }
       }
 
+      return isEqual;
+   }
+
+   /**
+    *
+    * Method determines how the given object has to be treated
+    *
+    * @param objToReflect
+    * @param isEqual
+    * @param entry
+    * @param field
+    * @return true if the values are all the same
+    * @throws IllegalAccessException
+    */
+
+   private static boolean processForMultipleTypes(Object objToReflect, boolean isEqual, Map.Entry<String, JsonElement> entry, Field field)
+         throws IllegalAccessException
+   {
+      Object fieldValue = field.get(objToReflect);
+      JsonElement jsonElement = entry.getValue();
+
+      if( jsonElement instanceof JsonObject )
+      {
+         //go a level deeper
+         isEqual = compareObjects(fieldValue, jsonElement.getAsJsonObject());
+      }
+      else if( jsonElement instanceof JsonArray )
+      {
+         isEqual = compareCollections(isEqual, fieldValue, (JsonArray) jsonElement);
+      }
+      else if( jsonElement instanceof JsonPrimitive )
+      {
+         comparePrimitives(isEqual, jsonElement, fieldValue);
+      }
       return isEqual;
    }
 

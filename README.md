@@ -1,13 +1,14 @@
 #Repository: javaReflectionJson
 
-##Instructions to install own examples
+##How to use the implementation
 
-- store the example JSON file in the inputs directory
-- add the Java Object model corresponding to the JSON file in the directory src/main/java/model
-- then open the class GsonParser under the directory src/main/java/features
-- there you can copy one of the methods parseToCompany or parseToPosition
-- after that you can change the return value to your root class type and
- the inner of the method like in the following snippet
+####Adding the methods
+The JSON file is parsed and either a generic object tree or a tree of concrete object types (like the given "company" or "position" class) is created. You can also use your own classes and JSON files to compare their contents with this implementation.
+1. store the JSON file you want to deserialize in the inputs directory
+2. add the Java Object model corresponding to the JSON file in the "src/main/java/model" directory 
+3. open the class GsonParser in the "src/main/java/features" directory
+4. copy one of the methods - either parseToCompany or parseToPosition
+5. change the return value to your root class type and the method body as in the following snippet
 
 ```
 public static YourClassType parseToYourClassType(String file) throws IOException
@@ -24,10 +25,11 @@ public static YourClassType parseToYourClassType(String file) throws IOException
       return yourObject;
    }
 ```
-
-- now you can open the test class CompareTreesTest under the directory src/test/java
-- there you can create a own constant with your path to the JSON file
-- then initialize an root object of your Java object model like in the following snippet
+####Testing the methods
+The generic tree created when applying the "parseToTree" method on a JSON file is compared to the "concrete" tree when deserialize the file to a specific object (e.g. "parseToCompany" or "parseToYourClass"). It is checked whether these two trees contain the same data. 
+1. open the test class CompareTreesTest in the "src/test/java" directory 
+2. create a new constant with your path to the JSON file
+3. initialize a root object of your Java object model as in the following snippet
 
 ```
 private YourClassType yourObject;
@@ -35,13 +37,11 @@ private YourClassType yourObject;
 @Before
 public void setUp() throws Exception
 {
-     yourObject = GsonParser.parseToYourClassType(FILE_PATH_YOUR_FILE);
+     yourObject = GsonParser.parseToYourClassType(YOUR_FILEPATH);
 }
 ```
-
-- create a new test method with the code line like below
+4. create a new test method with the code line like below
 ```
-assertTrue(ObjTreeComparator.validate(yourObject, FILE_PATH_YOUR_FILE));
+assertTrue(ObjTreeComparator.validate(yourObject, YOUR_FILEPATH));
 ```
-
-- then you can run this method to test your own example
+5. run this method to test it on your file
