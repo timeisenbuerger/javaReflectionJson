@@ -1,5 +1,12 @@
 #Repository: javaReflectionJson
 
+##Problem definition and solution
+
+This implementation deals with the problem that data from a JSON file are correctly converted into a generic object tree during the process of deserialization by the GSON library.
+To determine this, GSON also creates a concrete Java object model with a root element. This is traversed level by level and using the Reflection API, the fields of the current object are determined and their values compared with those of the generic object tree.
+If something is different in the comparison, the return value is set to false, otherwise the java object model and the generic object tree are the same and the return value is set to true.
+
+
 ##How to use the implementation
 
 ####Adding the methods
